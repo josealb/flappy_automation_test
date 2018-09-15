@@ -34,7 +34,7 @@ def laserScanCallback(msg):
     # msg has the format of sensor_msgs::LaserScan
     # print laser angle and range
     #print "Laser range: {}, angle: {}".format(msg.ranges[0], msg.angle_min)
-    #estimator.updateMeasurements(msg.ranges)
+    estimator.accumulatePoints(msg.ranges,msg.angle_min,msg.angle_increment)
     controller.updateMeasurements(msg.ranges)
 
 if __name__ == '__main__':
