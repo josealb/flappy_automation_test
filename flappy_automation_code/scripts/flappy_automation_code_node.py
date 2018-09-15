@@ -26,17 +26,16 @@ def velCallback(msg):
     # Example of publishing acceleration command on velocity velCallback
     x = 0   
     y = 0
-    [x,y] = controller.getControlUpdate(estimator.openingProbability)
-    x = 0   
-    y = 0
+    [x,y] = controller.getControlUpdate()
+
     pub_acc_cmd.publish(Vector3(x,y,0))
 
 def laserScanCallback(msg):
     # msg has the format of sensor_msgs::LaserScan
     # print laser angle and range
-    print "Laser range: {}, angle: {}".format(msg.ranges[0], msg.angle_min)
+    #print "Laser range: {}, angle: {}".format(msg.ranges[0], msg.angle_min)
     #estimator.updateMeasurements(msg.ranges)
-    controller.getCenterOfMass(msg.ranges)
+    controller.updateMeasurements(msg.ranges)
 
 if __name__ == '__main__':
     try:
