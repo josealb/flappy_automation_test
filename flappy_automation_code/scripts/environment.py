@@ -7,7 +7,6 @@ class openingEstimator:
         self.openingProbability = np.zeros(self.numberOfScanRays)
     def updateMeasurements(self, measurements):
         for i in range(0,9):
-            self.openingProbability[i] = self.openingProbability[i]+(1.8-measurements[i])
+            self.openingProbability[i] = self.openingProbability[i]+(measurements[i]-1.8)
             print("openingProbability at "+str(i)+"= "+str(self.openingProbability[i]))
 
-        return 0#TODO
