@@ -29,8 +29,11 @@ def velCallback(msg):
     y = 0
     estimator.updatePosition(msg)
     [x,y] = controller.getControlUpdate()
+    [x_avoidance,y_avoidance] = estimator.getcollisionAvoidanceOutput()
 
-    
+    x-=x_avoidance
+    y-=y_avoidance
+    #TODO implement collision avoidance based on map
 
     pub_acc_cmd.publish(Vector3(x,y,0))
 
