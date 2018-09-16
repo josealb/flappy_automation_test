@@ -5,6 +5,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Vector3
 import environment as en
 import control as con
+from copy import copy
 # Publisher for sending acceleration commands to flappy bird
 pub_acc_cmd = rospy.Publisher('/flappy_acc', Vector3, queue_size=1)
 estimator = en.openingEstimator()
@@ -34,8 +35,9 @@ def laserScanCallback(msg):
     # msg has the format of sensor_msgs::LaserScan
     # print laser angle and range
     #print "Laser range: {}, angle: {}".format(msg.ranges[0], msg.angle_min)
-    estimator.accumulatePoints(msg.ranges,msg.angle_min,msg.angle_increment)
-    controller.updateMeasurements(msg.ranges)
+    controller.updateMeasurements(copy(msg.ranges))
+    estimator.accumulatePoints(copy(msg.ranges),msg.angle_min,msg.angle_increment)
+
 
 if __name__ == '__main__':
     try:
