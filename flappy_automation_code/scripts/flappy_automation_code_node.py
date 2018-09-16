@@ -27,7 +27,10 @@ def velCallback(msg):
     # Example of publishing acceleration command on velocity velCallback
     x = 0   
     y = 0
+    estimator.updatePosition(msg)
     [x,y] = controller.getControlUpdate()
+
+    
 
     pub_acc_cmd.publish(Vector3(x,y,0))
 
