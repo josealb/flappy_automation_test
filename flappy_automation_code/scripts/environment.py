@@ -28,7 +28,7 @@ class openingEstimator:
                 x = measurements[i]*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
                 y = measurements[i]*math.sin(angle_min+i*angle_increment)+self.ego_position[1]
                 self.env_map.append([x, y])
-                print("added point "+str(x)+"," ,str(y))
+                #print("added point "+str(x)+"," ,str(y))
         self.saveMap()
 
     def plotMap(self):
@@ -48,8 +48,7 @@ class openingEstimator:
         print("Ego Position: "+str(self.ego_position))
 
     def getcollisionAvoidanceOutput(self):
-        closestObjectDistance = 999
-        threshold = 0.2
+        threshold = 0.3
         correction = [0,0]
         for i in range(0,len(self.env_map)):
             #used displacement instead of distance because distance cannot be negative
