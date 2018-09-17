@@ -6,9 +6,9 @@ class controller:
     integral_error = 0
     measurements = []
 
-    tau_p = 0.5
-    tau_i = 0
-    tau_d = 20
+    tau_p = 2
+    tau_i = 0#0.001
+    tau_d = 40
 
     def updateMeasurements(self,newMeasurements):
         self.measurements = newMeasurements

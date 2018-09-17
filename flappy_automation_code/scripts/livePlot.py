@@ -21,7 +21,29 @@ def animate(i):
             except:
                 print('WARNING: problem parsing some values')
     ax1.clear()
-    ax1.scatter(xs, ys)
+    try:
+        ax1.scatter(xs, ys)
+    except:
+        print('WARNING: problem parsing data. Probably file is being written')
+
+
+    graph_data = open('/home/flyatest/ego_position.txt','r').read()
+    lines = graph_data.split('\n')
+    xs = []
+    ys = []
+    for line in lines:
+        if len(line) > 1:
+            try:
+                x, y = line.split(',')
+                xs.append(float(x))
+                ys.append(float(y))
+            except:
+                print('WARNING: problem parsing some values')
+    try:
+        ax1.scatter(xs, ys, color='red')
+    except:
+        print('WARNING: problem parsing data. Probably file is being written')
+
 
 ani = animation.FuncAnimation(fig, animate, interval=1000)
 plt.show()
