@@ -20,6 +20,9 @@ class openingEstimator:
             print("openingProbability at "+str(i)+"= "+str(self.openingProbability[i]))
 
     def accumulatePoints(self, measurements,angle_min,angle_increment):
+        max_map_size = 1500
+        while len(self.env_map)>max_map_size:
+            self.env_map.pop(0)
         for i in range (0,len(measurements)):
             if measurements[i]<3.5:#means it hit something
                 x = measurements[i]*math.cos(angle_min+i*angle_increment)+self.ego_position[0]

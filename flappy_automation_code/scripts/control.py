@@ -26,6 +26,11 @@ class controller:
     def PIDupdate(self):
         #PID Error is center of mass since center
         error = self.centerOfMass - 4 #Bird should be centered on route with fewer obstacles
+        #clipping the error
+        if error > 0.4:
+            error = 0.4
+        if error < -0.4:
+            error = -0.4
         diff_error = error - self.previous_error
         self.previous_error = error
         self.integral_error += error
