@@ -8,6 +8,7 @@ class openingEstimator:
     openingProbability = [] #Probability that opening is at any of the 9 scan angles
     env_map = []
     ego_position = []
+    goal_position = []
 
     def __init__(self):
         self.openingProbability = np.zeros(self.numberOfScanRays)
@@ -41,6 +42,9 @@ class openingEstimator:
                 f.write(str(self.env_map[i][0])+','+str(self.env_map[i][1])+'\n')
         with open('/home/flyatest/ego_position.txt','a+') as f:
                 f.write(str(self.ego_position[0])+','+str(self.ego_position[1])+'\n')
+        if self.goal_position!=[]:
+            with open('/home/flyatest/goal_position.txt','a+') as f:
+                f.write(str(self.goal_position[0])+','+str(self.goal_position[1])+'\n')
 
     def updatePosition(self,velocity):
         self.ego_position[0] = self.ego_position[0] + velocity.x/30
@@ -50,18 +54,39 @@ class openingEstimator:
     def getcollisionAvoidanceOutput(self):
         threshold = 0.3
         correction = [0,0]
+        closestUpperObstacle = [100, 100]
+        closestLowerObstacle = [-100, -100]
+        smallestDistance = 999
         for i in range(0,len(self.env_map)):
             #used displacement instead of distance because distance cannot be negative
-            if self.env_map[0]>self.ego_position[0]-1:
+            #Find the most restrictive upper and lower boundaries in a 1m range around the bird
+            
+            if self.env_map[i][0]>self.ego_position[0]-1 and self.env_map[i][0]<self.ego_position[0]+1:
+                #print("found obstacles in x range")
+                y_displacement = self.env_map[i][1]-self.ego_position[1]
+                if y_displacement > 0:
+                    if abs(y_displacement)<abs(closestUpperObstacle[1]-self.ego_position[1]):
+                        closestUpperObstacle = self.env_map[i]
+                if y_displacement < 0 and self.env_map[i][1]<(closestUpperObstacle[1]-0.4):
+                    if abs(y_displacement)<abs(closestLowerObstacle[1]-self.ego_position[1]):
+                        closestLowerObstacle = self.env_map[i]
                 x_displacement = self.env_map[i][0]-self.ego_position[0]
                 y_displacement = self.env_map[i][1]-self.ego_position[1]
-                distance = math.sqrt(math.pow(x_displacement,2)+math.pow(y_displacement,2))
-                if distance<threshold:
-                    #nudge bird in the direction oposite to the obstacle, with more weight for closer obstacles
-                    #correction[0]+=-x_displacement * (threshold-abs(x_displacement)/threshold)
-                    
-                    #correction[0]=0 #no horizontal correction
-                    correction[1]+=-y_displacement * (threshold-abs(y_displacement)/threshold)*0.6
+                distance = math.sqrt(math.pow(x_displacement,2)+math.pow(y_displacement,2))   
+                if distance < smallestDistance:
+                    smallestDistance=distance     
+        if smallestDistance<threshold:
+            #When we get close to the rocks, we want to be as far as possible
+            self.goal_position=[0,0]
+            self.goal_position[1] = (closestUpperObstacle[1]+closestLowerObstacle[1])/2
+            self.goal_position[0] = self.ego_position[0]
+            error_to_goal = self.goal_position[1]-self.ego_position[1]
+            correction[1]=-error_to_goal*5 
+            print("Goal position y: "+str(self.goal_position[1]))
+            print("Error_to_goal"+str(error_to_goal))
+        else:
+            self.goal_position=[]
+        print("closestUpperObstacle: "+str(closestUpperObstacle)+"closestLowerObstacle: "+str(closestLowerObstacle))
         print("Correcting with_ "+str(correction))
         return correction
 
