@@ -28,7 +28,8 @@ def velCallback(msg):
     x = 0   
     y = 0
     estimator.updatePosition(msg)
-    [x,y] = controller.getControlUpdate()
+    [openingProbability,ego_position] = estimator.findOpening()
+    [x,y] = controller.getControlUpdate(openingProbability,ego_position)
     [x_avoidance,y_avoidance] = estimator.getcollisionAvoidanceOutput()
     if x_avoidance!=0 or y_avoidance!=0:
         x=-x_avoidance

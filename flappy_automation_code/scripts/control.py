@@ -10,22 +10,27 @@ class controller:
     tau_i = 0#0.001
     tau_d = 60
 
+    y_coord_start = -1.4
+    y_coord_end = 2.5
+    number_of_increments = 10
+
     def updateMeasurements(self,newMeasurements):
         self.measurements = newMeasurements
     
-    def getCenterOfMass(self):
+    def getCenterOfMass(self,openingProbability):
         weighted_sum = 0
         sum = 0
-        for i in range(0,len(self.measurements)):
-            weighted_sum += self.measurements[i]*i
-            sum += self.measurements[i]
+        for i in range(0,len(openingProbability)):
+            weighted_sum += openingProbability[i]*i
+            sum += openingProbability[i]
         center = weighted_sum / sum
-        self.centerOfMass = center
+        increment = (abs(self.y_coord_start-self.y_coord_end))/self.number_of_increments #translate center of mass increment to coordinates
+        self.centerOfMass = center*increment+self.y_coord_start
         print ("Center of mass is: "+str(center))
 
-    def PIDupdate(self):
+    def PIDupdate(self,ego_position):
         #PID Error is center of mass since center
-        error = self.centerOfMass - 4 #Bird should be centered on route with fewer obstacles
+        error = self.centerOfMass - ego_position[1] #Bird should be centered on route with fewer obstacles
         #clipping the error
         if error > 0.4:
             error = 0.4
@@ -44,8 +49,8 @@ class controller:
         print ("Error: "+str(error)+" Diff_error: " + str(diff_error)+"Integral error: " + str(self.integral_error))
         return steer
 
-    def getControlUpdate(self):
-        self.getCenterOfMass()
-        steer = self.PIDupdate()
+    def getControlUpdate(self, openingProbability,ego_position):
+        self.getCenterOfMass(openingProbability)
+        steer = self.PIDupdate(ego_position)
         x=0
         return [x,steer]

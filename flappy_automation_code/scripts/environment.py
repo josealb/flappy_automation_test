@@ -16,6 +16,12 @@ class openingEstimator:
     tau_i = 0#0.001
     tau_d = 160
 
+    y_coord_start = -1.4
+    y_coord_end = 2.5
+    number_of_increments = 10
+
+    position_of_next_column = 999
+
     def __init__(self):
         self.openingProbability = np.zeros(self.numberOfScanRays)
         self.ego_position = [0,0]
@@ -38,6 +44,29 @@ class openingEstimator:
                 self.env_map.append([x, y])
                 #print("added point "+str(x)+"," ,str(y))
         self.saveMap()
+        self.position_of_next_column = 999
+        for i in range (2,len(measurements)-2):
+            x_pos = measurements[i]*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
+            if x_pos<self.position_of_next_column:
+                self.position_of_next_column = x_pos+0.2
+
+    def findOpening(self):
+        #scan from self.y_coord_start to self.y_coord_end
+        increment = (abs(self.y_coord_start-self.y_coord_end))/self.number_of_increments
+        pointsInArea = np.ones(len(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
+        idx=0
+        for i in np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False):
+            for j in range(0,(len(self.env_map))):
+                if self.env_map[j][0]>self.position_of_next_column-0.5 and self.env_map[j][0]<self.position_of_next_column+0.5:
+                    if self.env_map[j][1]>i and self.env_map[j][1]<i+increment:
+                        pointsInArea[idx]+=1
+            idx+=1
+        print("Position of next column: " + str(self.position_of_next_column))
+        print("area locations: " + str(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
+        print("Empty area vector: " + str(pointsInArea))
+        openingLikely = 1/pointsInArea
+        print("Opening likelyhood: " + str(openingLikely))
+        return openingLikely,self.ego_position
 
     def plotMap(self):
         for i in range (0,len(self.env_map)):
@@ -68,7 +97,6 @@ class openingEstimator:
         steer = -self.tau_p * error + -self.tau_d * diff_error + -self.tau_i*self.integral_error
         print ("Error: "+str(error)+" Diff_error: " + str(diff_error)+"Integral error: " + str(self.integral_error))
         return steer
-
 
     def getcollisionAvoidanceOutput(self):
         threshold = 0.3
