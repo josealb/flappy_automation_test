@@ -12,9 +12,9 @@ class openingEstimator:
 
     previous_error = 0
     integral_error = 0
-    tau_p = 2
+    tau_p = 4
     tau_i = 0#0.001
-    tau_d = 40
+    tau_d = 160
 
     def __init__(self):
         self.openingProbability = np.zeros(self.numberOfScanRays)
@@ -105,6 +105,8 @@ class openingEstimator:
             print("Error_to_goal"+str(error_to_goal))
         else:
             self.goal_position=[]
+            self.previous_error = 0
+            self.integral_error = 0
         print("closestUpperObstacle: "+str(closestUpperObstacle)+"closestLowerObstacle: "+str(closestLowerObstacle))
         print("Correcting with_ "+str(correction))
         return correction

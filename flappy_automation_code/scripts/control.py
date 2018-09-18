@@ -8,7 +8,7 @@ class controller:
 
     tau_p = 2
     tau_i = 0#0.001
-    tau_d = 40
+    tau_d = 60
 
     def updateMeasurements(self,newMeasurements):
         self.measurements = newMeasurements
