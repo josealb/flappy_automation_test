@@ -10,10 +10,17 @@ class openingEstimator:
     ego_position = []
     goal_position = []
 
+    previous_error = 0
+    integral_error = 0
+    tau_p = 2
+    tau_i = 0#0.001
+    tau_d = 40
+
     def __init__(self):
         self.openingProbability = np.zeros(self.numberOfScanRays)
         self.ego_position = [0,0]
         open('/home/flyatest/ego_position.txt','w').close()
+        open('/home/flyatest/goal_position.txt','w').close()
 
     def updateMeasurements(self, measurements):
         for i in range(0,9):
@@ -50,6 +57,18 @@ class openingEstimator:
         self.ego_position[0] = self.ego_position[0] + velocity.x/30
         self.ego_position[1] = self.ego_position[1] + velocity.y/30
         print("Ego Position: "+str(self.ego_position))
+    
+    def obstacleAvoidancePIDUpdate(self, error):
+        #PID Error is center of mass since center
+        #clipping the error
+        
+        diff_error = error - self.previous_error
+        self.previous_error = error
+        self.integral_error += error
+        steer = -self.tau_p * error + -self.tau_d * diff_error + -self.tau_i*self.integral_error
+        print ("Error: "+str(error)+" Diff_error: " + str(diff_error)+"Integral error: " + str(self.integral_error))
+        return steer
+
 
     def getcollisionAvoidanceOutput(self):
         threshold = 0.3
@@ -81,7 +100,7 @@ class openingEstimator:
             self.goal_position[1] = (closestUpperObstacle[1]+closestLowerObstacle[1])/2
             self.goal_position[0] = self.ego_position[0]
             error_to_goal = self.goal_position[1]-self.ego_position[1]
-            correction[1]=-error_to_goal*5 
+            correction[1]=self.obstacleAvoidancePIDUpdate(error_to_goal) 
             print("Goal position y: "+str(self.goal_position[1]))
             print("Error_to_goal"+str(error_to_goal))
         else:

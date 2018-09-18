@@ -46,7 +46,7 @@ def laserScanCallback(msg):
     #print "Laser range: {}, angle: {}".format(msg.ranges[0], msg.angle_min)
     controller.updateMeasurements(copy(msg.ranges))
     estimator.accumulatePoints(copy(msg.ranges),msg.angle_min,msg.angle_increment)
-
+    
 
 if __name__ == '__main__':
     try:

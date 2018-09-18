@@ -31,8 +31,14 @@ class controller:
             error = 0.4
         if error < -0.4:
             error = -0.4
+
         diff_error = error - self.previous_error
         self.previous_error = error
+
+        if diff_error > 0.1:
+            diff_error = 0.1
+        elif diff_error < -0.1:
+            diff_error = -0.1    
         self.integral_error += error
         steer = self.tau_p * error + self.tau_d * diff_error + self.tau_i*self.integral_error
         print ("Error: "+str(error)+" Diff_error: " + str(diff_error)+"Integral error: " + str(self.integral_error))
