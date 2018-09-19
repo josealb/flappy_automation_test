@@ -7,6 +7,7 @@ class openingEstimator:
     numberOfScanRays = 9
     openingProbability = [] #Probability that opening is at any of the 9 scan angles
     env_map = []
+    freespace_map = []
     ego_position = []
     goal_position = []
 
@@ -37,12 +38,22 @@ class openingEstimator:
         max_map_size = 1500
         while len(self.env_map)>max_map_size:
             self.env_map.pop(0)
+        while len(self.freespace_map)>max_map_size:
+            self.freespace_map.pop(0)
+
         for i in range (0,len(measurements)):
             if measurements[i]<3.5:#means it hit something
                 x = measurements[i]*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
                 y = measurements[i]*math.sin(angle_min+i*angle_increment)+self.ego_position[1]
                 self.env_map.append([x, y])
                 #print("added point "+str(x)+"," ,str(y))
+
+        for i in range(0,len(measurements)):
+            for j in np.arange(0.1,measurements[i],1.5):
+                x2 = j*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
+                y2 = j*math.sin(angle_min+i*angle_increment)+self.ego_position[1]
+                self.freespace_map.append([x2, y2])
+
         self.saveMap()
         self.position_of_next_column = 999
         for i in range (2,len(measurements)-2):
@@ -76,6 +87,9 @@ class openingEstimator:
         with open('/home/flyatest/map.txt','w') as f:
             for i in range(0,len(self.env_map)):
                 f.write(str(self.env_map[i][0])+','+str(self.env_map[i][1])+'\n')
+        with open('/home/flyatest/freespace_map.txt','w') as f:
+            for i in range(0,len(self.freespace_map)):
+                f.write(str(self.freespace_map[i][0])+','+str(self.freespace_map[i][1])+'\n')
         with open('/home/flyatest/ego_position.txt','a+') as f:
                 f.write(str(self.ego_position[0])+','+str(self.ego_position[1])+'\n')
         if self.goal_position!=[]:
