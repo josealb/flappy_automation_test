@@ -23,6 +23,8 @@ class openingEstimator:
 
     position_of_next_column = 999
 
+    accumulationCounter = 0
+
     def __init__(self):
         self.openingProbability = np.zeros(self.numberOfScanRays)
         self.ego_position = [0,0]
@@ -35,6 +37,9 @@ class openingEstimator:
             print("openingProbability at "+str(i)+"= "+str(self.openingProbability[i]))
 
     def accumulatePoints(self, measurements,angle_min,angle_increment):
+        self.accumulationCounter+=1
+        if self.accumulationCounter%4!=0:
+            return
         max_map_size = 1500
         while len(self.env_map)>max_map_size:
             self.env_map.pop(0)
@@ -48,11 +53,13 @@ class openingEstimator:
                 self.env_map.append([x, y])
                 #print("added point "+str(x)+"," ,str(y))
 
-        for i in range(0,len(measurements)):
-            for j in np.arange(0.1,measurements[i],1.5):
-                x2 = j*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
-                y2 = j*math.sin(angle_min+i*angle_increment)+self.ego_position[1]
-                self.freespace_map.append([x2, y2])
+        #for i in range(0,len(measurements)):
+        for i in range(1,len(measurements)-1):
+            if measurements[i]>3:# and (measurements[i-1]>2 or measurements[i+1]>2):
+                for j in np.arange(1.5,measurements[i]-1,1):
+                    x2 = j*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
+                    y2 = j*math.sin(angle_min+i*angle_increment)+self.ego_position[1]
+                    self.freespace_map.append([x2, y2])
 
         self.saveMap()
         self.position_of_next_column = 999
@@ -60,6 +67,7 @@ class openingEstimator:
             x_pos = measurements[i]*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
             if x_pos<self.position_of_next_column:
                 self.position_of_next_column = x_pos+0.2
+        
 
     def findOpening(self):
         #scan from self.y_coord_start to self.y_coord_end
@@ -67,15 +75,16 @@ class openingEstimator:
         pointsInArea = np.ones(len(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
         idx=0
         for i in np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False):
-            for j in range(0,(len(self.env_map))):
-                if self.env_map[j][0]>self.position_of_next_column-0.5 and self.env_map[j][0]<self.position_of_next_column+0.5:
-                    if self.env_map[j][1]>i and self.env_map[j][1]<i+increment:
+            for j in range(0,(len(self.freespace_map))):
+                if self.freespace_map[j][0]>self.position_of_next_column-0.5 and self.freespace_map[j][0]<self.position_of_next_column+0.5:
+                    if self.freespace_map[j][1]>i and self.freespace_map[j][1]<i+increment:
                         pointsInArea[idx]+=1
             idx+=1
         print("Position of next column: " + str(self.position_of_next_column))
         print("area locations: " + str(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
         print("Empty area vector: " + str(pointsInArea))
-        openingLikely = 1/pointsInArea
+        #openingLikely = 1/pointsInArea
+        openingLikely = pointsInArea
         print("Opening likelyhood: " + str(openingLikely))
         return openingLikely,self.ego_position
 
