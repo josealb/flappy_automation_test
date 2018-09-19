@@ -84,8 +84,24 @@ class openingEstimator:
         print("area locations: " + str(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
         print("Empty area vector: " + str(pointsInArea))
         #openingLikely = 1/pointsInArea
-        openingLikely = pointsInArea
-        print("Opening likelyhood: " + str(openingLikely))
+        openingLikely1 = pointsInArea
+        
+        pointsInArea = np.ones(len(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
+        idx=0
+        for i in np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False):
+            for j in range(0,(len(self.env_map))):
+                if self.env_map[j][0]>self.position_of_next_column-0.5 and self.env_map[j][0]<self.position_of_next_column+0.5:
+                    if self.env_map[j][1]>i and self.env_map[j][1]<i+increment:
+                        pointsInArea[idx]+=1
+            idx+=1
+        print("Position of next column: " + str(self.position_of_next_column))
+        print("area locations: " + str(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
+        print("Empty area vector: " + str(pointsInArea))
+
+        openingLikely2 = 1/pointsInArea
+        print("Opening likelyhood: " + str(openingLikely2))
+
+        openingLikely = np.multiply(np.multiply(openingLikely1,0.3),np.multiply(openingLikely2,0.7))
         return openingLikely,self.ego_position
 
     def plotMap(self):
