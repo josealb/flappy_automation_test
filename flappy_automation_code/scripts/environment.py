@@ -54,7 +54,7 @@ class openingEstimator:
 
         self.saveMap()
         self.position_of_next_column = 999
-        for i in range (2,len(measurements)-2):
+        for i in range (0,len(measurements)):
             x_pos = measurements[i]*math.cos(angle_min+i*angle_increment)+self.ego_position[0]
             if x_pos<self.position_of_next_column:
                 self.position_of_next_column = x_pos+0.2
