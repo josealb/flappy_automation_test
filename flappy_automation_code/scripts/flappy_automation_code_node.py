@@ -28,15 +28,14 @@ def velCallback(msg):
     x = 0   
     y = 0
     estimator.updatePosition(msg)
-    [x,y] = controller.getControlUpdate()
+    [openingProbability,ego_position] = estimator.findOpening()
+    [x,y] = controller.getControlUpdate(openingProbability,ego_position)
     [x_avoidance,y_avoidance] = estimator.getcollisionAvoidanceOutput()
     if x_avoidance!=0 or y_avoidance!=0:
         x=-x_avoidance
         y=-y_avoidance
         print("Avoiding obstacle")
-    #x-=x_avoidance*2
-    #y-=y_avoidance*2
-    #TODO implement collision avoidance based on map
+    
     print("control output x: "+str(x)+" y: "+str(y))
     pub_acc_cmd.publish(Vector3(x,y,0))
 
@@ -44,7 +43,6 @@ def laserScanCallback(msg):
     # msg has the format of sensor_msgs::LaserScan
     # print laser angle and range
     #print "Laser range: {}, angle: {}".format(msg.ranges[0], msg.angle_min)
-    controller.updateMeasurements(copy(msg.ranges))
     estimator.accumulatePoints(copy(msg.ranges),msg.angle_min,msg.angle_increment)
     
 
