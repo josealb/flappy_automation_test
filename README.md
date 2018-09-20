@@ -1,6 +1,6 @@
 # Demo video
 
-View an example of the performance on this video
+Watch an example of the performance on this video
 
 [![Watch the video](https://github.com/josealb/flappy_automation_test/raw/master/flappy_automation_code/scripts/thumbnail.png)](https://youtu.be/bi6yy3KNseE)
 
