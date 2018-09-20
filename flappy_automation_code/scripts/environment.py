@@ -19,7 +19,7 @@ class openingEstimator:
 
     y_coord_start = -1.4
     y_coord_end = 2.5
-    number_of_increments = 10
+    number_of_increments = 15
 
     position_of_next_column = 999
 
@@ -40,10 +40,11 @@ class openingEstimator:
         self.accumulationCounter+=1
         if self.accumulationCounter%4!=0:
             return
-        max_map_size = 1500
+        max_map_size = 600
+        max_freespace_size = 300
         while len(self.env_map)>max_map_size:
             self.env_map.pop(0)
-        while len(self.freespace_map)>max_map_size:
+        while len(self.freespace_map)>max_freespace_size:
             self.freespace_map.pop(0)
 
         for i in range (0,len(measurements)):
@@ -85,6 +86,8 @@ class openingEstimator:
         print("Empty area vector: " + str(pointsInArea))
         #openingLikely = 1/pointsInArea
         openingLikely1 = pointsInArea
+
+        print("Opening likelyhood from freespace: " + str(openingLikely1))
         
         pointsInArea = np.ones(len(np.linspace(self.y_coord_start,self.y_coord_end,self.number_of_increments,endpoint=False)))
         idx=0
@@ -99,9 +102,14 @@ class openingEstimator:
         print("Empty area vector: " + str(pointsInArea))
 
         openingLikely2 = 1/pointsInArea
-        print("Opening likelyhood: " + str(openingLikely2))
 
-        openingLikely = np.multiply(np.multiply(openingLikely1,0.3),np.multiply(openingLikely2,0.7))
+
+        openingLikely = np.multiply(np.multiply(openingLikely1,1),np.multiply(openingLikely2,1))
+
+        print("Opening likelyhood from freespace: " + str(openingLikely1))
+        print("Opening likelyhood from detected obstacles: " + str(openingLikely2))
+        print("Combined opening likelyhood: " + str(openingLikely))
+
         return openingLikely,self.ego_position
 
     def plotMap(self):
@@ -109,18 +117,20 @@ class openingEstimator:
             plt.scatter(self.env_map[i][0],self.env_map[i][1])
 
     def saveMap(self):
+        with open('/home/flyatest/ego_position.txt','a+') as f:
+                f.write(str(self.ego_position[0])+','+str(self.ego_position[1])+'\n')
+        if self.goal_position!=[]:
+            with open('/home/flyatest/goal_position.txt','a+') as f:
+                f.write(str(self.goal_position[0])+','+str(self.goal_position[1])+'\n')
+        if self.accumulationCounter%15!=0:
+            return
         with open('/home/flyatest/map.txt','w') as f:
             for i in range(0,len(self.env_map)):
                 f.write(str(self.env_map[i][0])+','+str(self.env_map[i][1])+'\n')
         with open('/home/flyatest/freespace_map.txt','w') as f:
             for i in range(0,len(self.freespace_map)):
                 f.write(str(self.freespace_map[i][0])+','+str(self.freespace_map[i][1])+'\n')
-        with open('/home/flyatest/ego_position.txt','a+') as f:
-                f.write(str(self.ego_position[0])+','+str(self.ego_position[1])+'\n')
-        if self.goal_position!=[]:
-            with open('/home/flyatest/goal_position.txt','a+') as f:
-                f.write(str(self.goal_position[0])+','+str(self.goal_position[1])+'\n')
-
+        
     def updatePosition(self,velocity):
         self.ego_position[0] = self.ego_position[0] + velocity.x/30
         self.ego_position[1] = self.ego_position[1] + velocity.y/30

@@ -1,6 +1,7 @@
 import numpy as np
 
 class controller:
+    maxProbability=0
     centerOfMass = 0
     previous_error = 0
     integral_error = 0
@@ -12,7 +13,7 @@ class controller:
 
     y_coord_start = -1.4
     y_coord_end = 2.5
-    number_of_increments = 10
+    number_of_increments = 15
 
     def updateMeasurements(self,newMeasurements):
         self.measurements = newMeasurements
@@ -28,9 +29,17 @@ class controller:
         self.centerOfMass = center*increment+self.y_coord_start
         print ("Center of mass is: "+str(center))
 
+    def getMax(self,openingProbability):
+        center = np.argmax(openingProbability)
+        
+        increment = (abs(self.y_coord_start-self.y_coord_end))/self.number_of_increments #translate center of mass increment to coordinates
+        #self.centerOfMass = center*increment+self.y_coord_start
+        self.maxProbability = center*increment+self.y_coord_start
+        print ("Center of mass is: "+str(center))
+
     def PIDupdate(self,ego_position):
         #PID Error is center of mass since center
-        error = self.centerOfMass - ego_position[1] #Bird should be centered on route with fewer obstacles
+        error = self.maxProbability - ego_position[1]+0.15 #Bird should be centered on route with fewer obstacles
         #clipping the error
         if error > 0.4:
             error = 0.4
@@ -50,7 +59,8 @@ class controller:
         return steer
 
     def getControlUpdate(self, openingProbability,ego_position):
-        self.getCenterOfMass(openingProbability)
+        #self.getCenterOfMass(openingProbability)
+        self.getMax(openingProbability)
         steer = self.PIDupdate(ego_position)
         x=0
         return [x,steer]
